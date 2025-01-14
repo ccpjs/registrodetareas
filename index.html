@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Trabajos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, textarea, button, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #5cb85c;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #4cae4c;
+    }
+    .task-list {
+      max-width: 500px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .task {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .task img {
+      max-width: 100%;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    .task.completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+    .delete-button, .edit-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #d9534f;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .delete-button:hover, .edit-button:hover {
+      background: #c9302c;
+    }
+    #searchBar {
+      max-width: 500px;
+      margin: 20px auto;
+      display: block;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Registro de Trabajos</h1>
+
+  <input type="text" id="searchBar" placeholder="Buscar tareas...">
+
+  <form id="taskForm">
+    <label for="taskTitle">Título de la Tarea:</label>
+    <input type="text" id="taskTitle" placeholder="Ingrese el título de la tarea" required>
+
+    <label for="taskLocation">Ubicación:</label>
+    <select id="taskLocation" required>
+      <option value="" disabled selected>Seleccione una ubicación</option>
+      <option value="Torre Industrial">Torre Industrial</option>
+      <option value="Torre 1-2">Torre 1-2</option>
+      <option value="Torre 3-4">Torre 3-4</option>
+      <option value="Torre 5-6">Torre 5-6</option>
+    </select>
+
+    <label for="taskDescription">Descripción de la Tarea:</label>
+    <textarea id="taskDescription" placeholder="Ingrese la descripción de la tarea" required></textarea>
+
+    <label for="taskExecutor">Tarea ejecutada por:</label>
+    <input type="text" id="taskExecutor" placeholder="Ingrese el nombre de la persona que ejecutará la tarea" required>
+
+    <label for="taskDate">Día, Mes, Año:</label>
+    <input type="text" id="taskDate" placeholder="Ingrese el día, mes y año" required>
+
+    <label for="taskImage">Adjuntar solo una foto:</label>
+    <input type="file" id="taskImage" accept="image/*">
+
+    <button type="submit">Agregar Tarea</button>
+  </form>
+
+  <div class="task-list" id="taskList">
+    <h2>Tareas:</h2>
+  </div>
+
+  <script>
+    const taskForm = document.getElementById('taskForm');
+    const taskList = document.getElementById('taskList');
+    const searchBar = document.getElementById('searchBar');
+
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = '<h2>Tareas:</h2>';
+      tasks.forEach((task, index) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = `task ${task.completed ? 'completed' : ''}`;
+
+        const taskTitle = document.createElement('h3');
+        taskTitle.textContent = task.title;
+        taskDiv.appendChild(taskTitle);
+
+        const taskLocation = document.createElement('p');
+        taskLocation.textContent = `Ubicación: ${task.location}`;
+        taskDiv.appendChild(taskLocation);
+
+        const taskDescription = document.createElement('p');
+        taskDescription.textContent = task.description;
+        taskDiv.appendChild(taskDescription);
+
+        const taskExecutor = document.createElement('p');
+        taskExecutor.textContent = `Ejecutado por: ${task.executor}`;
+        taskDiv.appendChild(taskExecutor);
+
+        const taskDate = document.createElement('p');
+        taskDate.textContent = `Día, Mes, Año: ${task.dateInfo}`;
+        taskDiv.appendChild(taskDate);
+
+        if (task.image) {
+          const taskImage = document.createElement('img');
+          taskImage.src = task.image;
+          taskDiv.appendChild(taskImage);
+        }
+
+        const taskCreatedDate = document.createElement('small');
+        taskCreatedDate.textContent = `Creada el: ${task.date}`;
+        taskDiv.appendChild(taskCreatedDate);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Eliminar';
+        deleteButton.className = 'delete-button';
+        deleteButton.onclick = () => {
+          tasks.splice(index, 1);
+          saveTasks();
+          renderTasks();
+        };
+        taskDiv.appendChild(deleteButton);
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = task.completed;
+        checkbox.onchange = () => {
+          task.completed = !task.completed;
+          saveTasks();
+          renderTasks();
+        };
+        taskDiv.appendChild(checkbox);
+
+        taskList.appendChild(taskDiv);
+      });
+    }
+
+    taskForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const title = document.getElementById('taskTitle').value;
+      const location = document.getElementById('taskLocation').value;
+      const description = document.getElementById('taskDescription').value;
+      const executor = document.getElementById('taskExecutor').value;
+      const dateInfo = document.getElementById('taskDate').value;
+      const imageInput = document.getElementById('taskImage');
+      const imageFile = imageInput.files[0];
+
+      const task = {
+        title,
+        location,
+        description,
+        executor,
+        dateInfo,
+        image: null,
+        date: new Date().toLocaleString(),
+        completed: false
+      };
+
+      if (imageFile) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          task.image = reader.result;
+          tasks.push(task);
+          saveTasks();
+          renderTasks();
+        };
+        reader.readAsDataURL(imageFile);
+      } else {
+        tasks.push(task);
+        saveTasks();
+        renderTasks();
+      }
+
+      taskForm.reset();
+    });
+
+    searchBar.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      document.querySelectorAll('.task').forEach(task => {
+        const matches = task.textContent.toLowerCase().includes(query);
+        task.style.display = matches ? 'block' : 'none';
+      });
+    });
+
+    renderTasks();
+  </script>
+</body>
+</html>

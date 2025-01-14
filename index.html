@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro de Trabajos</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -58,9 +59,6 @@
       border-radius: 5px;
       background-color: #f9f9f9;
       position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
     }
     .task img {
       max-width: 100%;
@@ -71,40 +69,32 @@
       text-decoration: line-through;
       color: gray;
     }
-    .delete-button, .edit-button {
-      position: absolute;
-      top: 10px;
-      right: 10px;
+    .delete-button, .share-button {
       background: #d9534f;
       color: white;
       border: none;
       padding: 5px 10px;
       border-radius: 5px;
       cursor: pointer;
+      margin-top: 10px;
     }
-    .delete-button:hover, .edit-button:hover {
+    .delete-button:hover {
       background: #c9302c;
     }
-    #searchBar {
-      max-width: 500px;
-      margin: 20px auto;
-      display: block;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+    .share-button {
+      background: #007bff;
+    }
+    .share-button:hover {
+      background: #0056b3;
     }
   </style>
 </head>
 <body>
   <h1>Registro de Trabajos</h1>
 
-  <input type="text" id="searchBar" placeholder="Buscar tareas...">
-
   <form id="taskForm">
-    <label for="taskTitle">Título de la Tarea:</label>
     <input type="text" id="taskTitle" placeholder="Ingrese el título de la tarea" required>
 
-    <label for="taskLocation">Ubicación:</label>
     <select id="taskLocation" required>
       <option value="" disabled selected>Seleccione una ubicación</option>
       <option value="Torre Industrial">Torre Industrial</option>
@@ -113,16 +103,45 @@
       <option value="Torre 5-6">Torre 5-6</option>
     </select>
 
-    <label for="taskDescription">Descripción de la Tarea:</label>
+    <select id="taskType" required>
+      <option value="" disabled selected>Seleccione el tipo de tarea</option>
+      <option value="Mantenimiento Correctivo">Mantenimiento Correctivo</option>
+      <option value="Mantenimiento Preventivo">Mantenimiento Preventivo</option>
+      <option value="Control de Operaciones">Control de Operaciones</option>
+      <option value="Repuesto">Repuesto</option>
+      <option value="Inspección">Inspección</option>
+      <option value="Otros">Otros</option>
+    </select>
+
+    <select id="taskEquipment" required>
+      <option value="" disabled selected>Seleccione el equipo</option>
+      <option value="Generador">Generador</option>
+      <option value="Transformador">Transformador</option>
+      <option value="Tablero de Transferencia">Tablero de Transferencia</option>
+      <option value="Luminarias">Luminarias</option>
+    </select>
+
+    <!-- Nueva pestaña para identidad del equipo -->
+    <select id="taskEquipmentIdentity" required>
+      <option value="" disabled selected>Identidad del Equipo</option>
+      <option value="Generador 1">Generador 1</option>
+      <option value="Generador 2">Generador 2</option>
+      <option value="Generador 3">Generador 3</option>
+      <option value="Transferencia 1">Transferencia 1</option>
+      <option value="Transferencia 2">Transferencia 2</option>
+      <option value="Transferencia 3">Transferencia 3</option>
+      <option value="Transformador 1">Transformador 1</option>
+      <option value="Transformador 2">Transformador 2</option>
+      <option value="Transformador 3">Transformador 3</option>
+      <option value="No Aplica">No Aplica</option>
+    </select>
+
     <textarea id="taskDescription" placeholder="Ingrese la descripción de la tarea" required></textarea>
 
-    <label for="taskExecutor">Tarea ejecutada por:</label>
     <input type="text" id="taskExecutor" placeholder="Ingrese el nombre de la persona que ejecutará la tarea" required>
 
-    <label for="taskDate">Día, Mes, Año:</label>
     <input type="text" id="taskDate" placeholder="Ingrese el día, mes y año" required>
 
-    <label for="taskImage">Adjuntar solo una foto:</label>
     <input type="file" id="taskImage" accept="image/*">
 
     <button type="submit">Agregar Tarea</button>
@@ -135,7 +154,6 @@
   <script>
     const taskForm = document.getElementById('taskForm');
     const taskList = document.getElementById('taskList');
-    const searchBar = document.getElementById('searchBar');
 
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
@@ -169,15 +187,29 @@
         taskDate.textContent = `Día, Mes, Año: ${task.dateInfo}`;
         taskDiv.appendChild(taskDate);
 
+        const taskType = document.createElement('p');
+        taskType.textContent = `Tipo de Tarea: ${task.type}`;
+        taskDiv.appendChild(taskType);
+
+        const taskEquipment = document.createElement('p');
+        taskEquipment.textContent = `Equipo: ${task.equipment}`;
+        taskDiv.appendChild(taskEquipment);
+
+        const taskEquipmentIdentity = document.createElement('p');
+        taskEquipmentIdentity.textContent = `Identidad del Equipo: ${task.equipmentIdentity}`;
+        taskDiv.appendChild(taskEquipmentIdentity);
+
         if (task.image) {
           const taskImage = document.createElement('img');
           taskImage.src = task.image;
           taskDiv.appendChild(taskImage);
         }
 
-        const taskCreatedDate = document.createElement('small');
-        taskCreatedDate.textContent = `Creada el: ${task.date}`;
-        taskDiv.appendChild(taskCreatedDate);
+        const shareButton = document.createElement('button');
+        shareButton.textContent = 'Compartir';
+        shareButton.className = 'share-button';
+        shareButton.onclick = () => shareTaskAsImage(taskDiv);
+        taskDiv.appendChild(shareButton);
 
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Eliminar';
@@ -189,17 +221,27 @@
         };
         taskDiv.appendChild(deleteButton);
 
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.checked = task.completed;
-        checkbox.onchange = () => {
-          task.completed = !task.completed;
-          saveTasks();
-          renderTasks();
-        };
-        taskDiv.appendChild(checkbox);
-
         taskList.appendChild(taskDiv);
+      });
+    }
+
+    function shareTaskAsImage(taskElement) {
+      const width = taskElement.offsetWidth;
+      const height = taskElement.offsetHeight;
+
+      html2canvas(taskElement, { width, height }).then(canvas => {
+        canvas.toBlob(blob => {
+          const file = new File([blob], 'tarea.png', { type: 'image/png' });
+          if (navigator.share) {
+            navigator.share({
+              files: [file],
+              title: 'Tarea Compartida',
+              text: '¡Mira esta tarea!'
+            });
+          } else {
+            alert('La API de compartir no es compatible con este navegador.');
+          }
+        });
       });
     }
 
@@ -211,6 +253,9 @@
       const description = document.getElementById('taskDescription').value;
       const executor = document.getElementById('taskExecutor').value;
       const dateInfo = document.getElementById('taskDate').value;
+      const type = document.getElementById('taskType').value;
+      const equipment = document.getElementById('taskEquipment').value;
+      const equipmentIdentity = document.getElementById('taskEquipmentIdentity').value;
       const imageInput = document.getElementById('taskImage');
       const imageFile = imageInput.files[0];
 
@@ -220,8 +265,10 @@
         description,
         executor,
         dateInfo,
+        type,
+        equipment,
+        equipmentIdentity,  // Se añade la identidad del equipo
         image: null,
-        date: new Date().toLocaleString(),
         completed: false
       };
 
@@ -239,16 +286,6 @@
         saveTasks();
         renderTasks();
       }
-
-      taskForm.reset();
-    });
-
-    searchBar.addEventListener('input', (e) => {
-      const query = e.target.value.toLowerCase();
-      document.querySelectorAll('.task').forEach(task => {
-        const matches = task.textContent.toLowerCase().includes(query);
-        task.style.display = matches ? 'block' : 'none';
-      });
     });
 
     renderTasks();

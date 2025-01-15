@@ -117,6 +117,7 @@
       <option value="Torre 1-2">Torre 1-2</option>
       <option value="Torre 3-4">Torre 3-4</option>
       <option value="Torre 5-6">Torre 5-6</option>
+      <option value="Otros">Otros</option>
     </select>
 
     <select id="taskEquipment" required>
@@ -125,19 +126,20 @@
       <option value="Transformador">Transformador</option>
       <option value="Tablero de Transferencia">Tablero de Transferencia</option>
       <option value="Luminarias">Luminarias</option>
+      <option value="Otros">Otros</option>
     </select>
 
     <select id="taskEquipmentIdentity" required>
       <option value="" disabled selected>Identidad del Equipo</option>
-      <option value="Generador 1">Generador 1</option>
-      <option value="Generador 2">Generador 2</option>
-      <option value="Generador 3">Generador 3</option>
-      <option value="Transferencia 1">Transferencia 1</option>
-      <option value="Transferencia 2">Transferencia 2</option>
-      <option value="Transferencia 3">Transferencia 3</option>
-      <option value="Transformador 1">Transformador 1</option>
-      <option value="Transformador 2">Transformador 2</option>
-      <option value="Transformador 3">Transformador 3</option>
+      <option value="G1">G1</option>
+      <option value="G2">G2</option>
+      <option value="G3">G3</option>
+      <option value="TTA1">TTA1</option>
+      <option value="TTA2">TTA2</option>
+      <option value="TTA3">TTA3</option>
+      <option value="TR1">TR1</option>
+      <option value="TR2">TR2</option>
+      <option value="TR3">TR3</option>
       <option value="No Aplica">No Aplica</option>
     </select>
 
@@ -303,6 +305,8 @@
         saveTasks();
         renderTasks();
       }
+
+      taskForm.reset();
     });
 
     renderTasks();

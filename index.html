@@ -87,6 +87,12 @@
     .share-button:hover {
       background: #0056b3;
     }
+
+    /* Estilo para la descripción subrayada y de color azul */
+    .task-description {
+      text-decoration: underline;
+      color: blue;
+    }
   </style>
 </head>
 <body>
@@ -94,14 +100,6 @@
 
   <form id="taskForm">
     <input type="text" id="taskTitle" placeholder="Ingrese el título de la tarea" required>
-
-    <select id="taskLocation" required>
-      <option value="" disabled selected>Seleccione una ubicación</option>
-      <option value="Torre Industrial">Torre Industrial</option>
-      <option value="Torre 1-2">Torre 1-2</option>
-      <option value="Torre 3-4">Torre 3-4</option>
-      <option value="Torre 5-6">Torre 5-6</option>
-    </select>
 
     <select id="taskType" required>
       <option value="" disabled selected>Seleccione el tipo de tarea</option>
@@ -113,6 +111,14 @@
       <option value="Otros">Otros</option>
     </select>
 
+    <select id="taskLocation" required>
+      <option value="" disabled selected>Seleccione una ubicación</option>
+      <option value="Torre Industrial">Torre Industrial</option>
+      <option value="Torre 1-2">Torre 1-2</option>
+      <option value="Torre 3-4">Torre 3-4</option>
+      <option value="Torre 5-6">Torre 5-6</option>
+    </select>
+
     <select id="taskEquipment" required>
       <option value="" disabled selected>Seleccione el equipo</option>
       <option value="Generador">Generador</option>
@@ -121,7 +127,6 @@
       <option value="Luminarias">Luminarias</option>
     </select>
 
-    <!-- Nueva pestaña para identidad del equipo -->
     <select id="taskEquipmentIdentity" required>
       <option value="" disabled selected>Identidad del Equipo</option>
       <option value="Generador 1">Generador 1</option>
@@ -167,50 +172,62 @@
         const taskDiv = document.createElement('div');
         taskDiv.className = `task ${task.completed ? 'completed' : ''}`;
 
+        // Título de la tarea
         const taskTitle = document.createElement('h3');
         taskTitle.textContent = task.title;
         taskDiv.appendChild(taskTitle);
 
-        const taskLocation = document.createElement('p');
-        taskLocation.textContent = `Ubicación: ${task.location}`;
-        taskDiv.appendChild(taskLocation);
-
-        const taskDescription = document.createElement('p');
-        taskDescription.textContent = task.description;
-        taskDiv.appendChild(taskDescription);
-
-        const taskExecutor = document.createElement('p');
-        taskExecutor.textContent = `Ejecutado por: ${task.executor}`;
-        taskDiv.appendChild(taskExecutor);
-
-        const taskDate = document.createElement('p');
-        taskDate.textContent = `Día, Mes, Año: ${task.dateInfo}`;
-        taskDiv.appendChild(taskDate);
-
+        // Tipo de tarea
         const taskType = document.createElement('p');
         taskType.textContent = `Tipo de Tarea: ${task.type}`;
         taskDiv.appendChild(taskType);
 
+        // Ubicación de la tarea
+        const taskLocation = document.createElement('p');
+        taskLocation.textContent = `Ubicación: ${task.location}`;
+        taskDiv.appendChild(taskLocation);
+
+        // Equipo relacionado con la tarea
         const taskEquipment = document.createElement('p');
         taskEquipment.textContent = `Equipo: ${task.equipment}`;
         taskDiv.appendChild(taskEquipment);
 
+        // Identidad del equipo
         const taskEquipmentIdentity = document.createElement('p');
         taskEquipmentIdentity.textContent = `Identidad del Equipo: ${task.equipmentIdentity}`;
         taskDiv.appendChild(taskEquipmentIdentity);
 
+        // Descripción de la tarea (subrayada y azul)
+        const taskDescription = document.createElement('p');
+        taskDescription.textContent = task.description;
+        taskDescription.className = 'task-description';  // Clase para el estilo
+        taskDiv.appendChild(taskDescription);
+
+        // Persona que ejecutará la tarea
+        const taskExecutor = document.createElement('p');
+        taskExecutor.textContent = `Ejecutado por: ${task.executor}`;
+        taskDiv.appendChild(taskExecutor);
+
+        // Fecha de la tarea
+        const taskDate = document.createElement('p');
+        taskDate.textContent = `Día, Mes, Año: ${task.dateInfo}`;
+        taskDiv.appendChild(taskDate);
+
+        // Imagen de la tarea
         if (task.image) {
           const taskImage = document.createElement('img');
           taskImage.src = task.image;
           taskDiv.appendChild(taskImage);
         }
 
+        // Botón para compartir
         const shareButton = document.createElement('button');
         shareButton.textContent = 'Compartir';
         shareButton.className = 'share-button';
         shareButton.onclick = () => shareTaskAsImage(taskDiv);
         taskDiv.appendChild(shareButton);
 
+        // Botón para eliminar
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Eliminar';
         deleteButton.className = 'delete-button';
@@ -249,25 +266,25 @@
       e.preventDefault();
 
       const title = document.getElementById('taskTitle').value;
+      const type = document.getElementById('taskType').value;
       const location = document.getElementById('taskLocation').value;
+      const equipment = document.getElementById('taskEquipment').value;
+      const equipmentIdentity = document.getElementById('taskEquipmentIdentity').value;
       const description = document.getElementById('taskDescription').value;
       const executor = document.getElementById('taskExecutor').value;
       const dateInfo = document.getElementById('taskDate').value;
-      const type = document.getElementById('taskType').value;
-      const equipment = document.getElementById('taskEquipment').value;
-      const equipmentIdentity = document.getElementById('taskEquipmentIdentity').value;
       const imageInput = document.getElementById('taskImage');
       const imageFile = imageInput.files[0];
 
       const task = {
         title,
+        type,
         location,
+        equipment,
+        equipmentIdentity,
         description,
         executor,
         dateInfo,
-        type,
-        equipment,
-        equipmentIdentity,  // Se añade la identidad del equipo
         image: null,
         completed: false
       };
